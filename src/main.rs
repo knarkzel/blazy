@@ -1,7 +1,8 @@
 use askama::Template;
 use serde::Deserialize;
-use tower_http::services::ServeDir;
+use tower_http::{services::ServeDir, compression::CompressionLayer};
 use axum::{response::IntoResponse, routing::{get, post}, Router, Form};
+use tower_livereload::LiveReloadLayer;
 
 #[derive(Template)]
 #[template(path = "index.html")]
@@ -34,6 +35,8 @@ async fn main() -> anyhow::Result<()> {
     let app = Router::new()
         .route("/", get(index))
         .route("/skill", post(skill))
+        .layer(LiveReloadLayer::new())
+        .layer(CompressionLayer::new())
         .nest_service("/static", ServeDir::new("static/"));
 
     // Start server

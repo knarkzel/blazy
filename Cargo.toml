@@ -16,8 +16,9 @@ askama = { version = "0.12.1", features = ["with-axum"] }
 
 # error handling
 anyhow = "1.0"
-tower-http = { version = "0.5.0", features = ["fs"] }
+tower-http = { version = "0.5.0", features = ["fs", "compression-gzip"] }
 serde = { version = "1.0.195", features = ["derive"] }
+tower-livereload = "0.9.1"
 
 [profile.dev.package.askama_derive]
 opt-level = 3
