@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Hello, {{name}}!{% endblock %}
+
+{% block body %}
+<h1>Hello, {{ name }}!</h1>
+<p>Welcome to my awesome homepage.</p>
+<form hx-post="/skill" hx-target="#result">
+  <sl-select label="Experience" help-text="Please tell us your skill level." name="experience" value="novice">
+    <sl-option value="novice">Novice</sl-option>
+    <sl-option value="intermediate">Intermediate</sl-option>
+    <sl-option value="advanced">Advanced</sl-option>
+  </sl-select>
+  <sl-button variant="primary" type="submit">Click me!</sl-button>
+</form>
+<div id="result"></div>
+{% endblock %}

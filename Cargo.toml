@@ -4,8 +4,20 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+# async
 axum = "0.7"
-anyhow = "1.0"
 tracing = "0.1"
 tracing-subscriber = "0.3"
 tokio = { version = "1.35", features = ["macros", "rt-multi-thread"] }
+
+# templates
+askama_axum = "0.4"
+askama = { version = "0.12.1", features = ["with-axum"] }
+
+# error handling
+anyhow = "1.0"
+tower-http = { version = "0.5.0", features = ["fs"] }
+serde = { version = "1.0.195", features = ["derive"] }
+
+[profile.dev.package.askama_derive]
+opt-level = 3

@@ -1,0 +1,10 @@
+:not(:defined) {
+  visibility: hidden;
+}
+
+body {
+  margin: auto;
+  max-width: 38rem;
+  padding: 2rem 1rem;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+}
