@@ -1,29 +1,40 @@
 use askama::Template;
-use serde::Deserialize;
+use axum::Form;
+use axum::extract::State;
+use axum::response::Redirect;
+use axum::routing::post;
+use serde::{Serialize, Deserialize};
 use tower_http::{services::ServeDir, compression::CompressionLayer};
-use axum::{response::IntoResponse, routing::{get, post}, Router, Form};
+use axum::{response::IntoResponse, routing::get, Router};
 use tower_livereload::LiveReloadLayer;
+use surrealdb::Surreal;
+use surrealdb::engine::local::{Mem, Db};
+
+#[derive(Serialize, Deserialize)]
+struct Post {
+    title: String,
+    content: String,
+}
 
 #[derive(Template)]
 #[template(path = "index.html")]
 struct Index {
-    name: String,
+    posts: Vec<Post>,
 }
 
-async fn index() -> impl IntoResponse {
+async fn index(State(db): State<Surreal<Db>>) -> impl IntoResponse {
+    // Get all posts
+    let posts: Vec<Post> = db.select("post").await.unwrap();
+    
     Index {
-        name: String::from("Ralph"),
+        posts
     }
 }
 
-#[derive(Deserialize, Template)]
-#[template(path = "skill.html")]
-struct Skill {
-    experience: String,
-}
-
-async fn skill(Form(skill): Form<Skill>) -> impl IntoResponse {
-    skill
+async fn insert(State(db): State<Surreal<Db>>, Form(post): Form<Post>) -> impl IntoResponse {
+    // Get all posts
+    let _: Vec<Post> = db.create("post").content(post).await.unwrap();
+    Redirect::to("/")
 }
 
 #[tokio::main]
@@ -31,13 +42,18 @@ async fn main() -> anyhow::Result<()> {
     // Logging
     tracing_subscriber::fmt::init();
 
+    // Database
+    let db = Surreal::new::<Mem>(()).await?;
+    db.use_ns("blazy").use_db("main").await?;
+
     // Setup router
     let app = Router::new()
         .route("/", get(index))
-        .route("/skill", post(skill))
+        .route("/insert", post(insert))
         .layer(LiveReloadLayer::new())
         .layer(CompressionLayer::new())
-        .nest_service("/static", ServeDir::new("static/"));
+        .nest_service("/static", ServeDir::new("static/"))
+        .with_state(db);
 
     // Start server
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
